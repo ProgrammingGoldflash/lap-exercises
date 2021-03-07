@@ -1,3 +1,4 @@
+using Blazor.DatabaseListing.Components;
 using Blazor.DatabaseListing.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -30,6 +31,8 @@ namespace Blazor.DatabaseListing
             services.AddRazorPages();
             services.AddServerSideBlazor();
             services.AddSingleton<WeatherForecastService>();
+            services.AddSingleton<SqlQueryService>();
+            services.AddSingleton<PageHistoryState>();
 
             services.AddMudServices();
         }

@@ -1,0 +1,32 @@
+﻿@typeparam T
+
+<MudTable Items="@Data" Hover="true" Dense="true" Breakpoint="Breakpoint.Sm">
+    <HeaderContent>
+        @foreach (var prop in _properties)
+        {
+            <MudTh>@prop.Name</MudTh>
+        }
+    </HeaderContent>
+    <RowTemplate>
+        @foreach (var prop in _properties)
+        {
+            <MudTd DataLabel="@prop.Name">@prop.GetValue(context)</MudTd>
+        }
+    </RowTemplate>
+</MudTable>
+
+
+@code {
+
+    [Parameter]
+    public ICollection<T> Data { get; set; }
+
+    private List<System.Reflection.PropertyInfo> _properties;
+
+    protected override void OnInitialized()
+    {
+        _properties = typeof(T).GetProperties().ToList();
+
+        base.OnInitialized();
+    }
+}

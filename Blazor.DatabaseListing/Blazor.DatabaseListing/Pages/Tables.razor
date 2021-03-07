@@ -1,0 +1,34 @@
+﻿@page "/databases/{DatabaseName}/tables/{TableName}"
+
+@inherits BasePageComponent
+@inject SqlQueryService SqlQueryService
+@using Blazor.DatabaseListing.DTOs;
+@using Blazor.DatabaseListing.Components;
+
+
+@if (PageState.CanGoBack())
+{
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo(PageState.PreviousPage(), true))"></MudIconButton>
+}
+
+<DynamicTable @ref="dynamicTable" T="TableColumn" Data="Data"></DynamicTable>
+
+@code {
+    [Parameter]
+    public string DatabaseName { get; set; }
+
+    [Parameter]
+    public string TableName { get; set; }
+
+    public ICollection<TableColumn> Data { get; set; } = new List<TableColumn>();
+
+    DynamicTable<TableColumn> dynamicTable;
+
+    protected override void OnInitialized()
+    {
+        var parameters = new { Table = TableName };
+        Data = SqlQueryService.ExecuteQuery<TableColumn>($"USE {DatabaseName}; SELECT COLUMN_NAME 'Name', DATA_TYPE 'DataType', IS_NULLABLE 'Nullable' FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME=@Table", parameters);
+
+        base.OnInitialized();
+    }
+}

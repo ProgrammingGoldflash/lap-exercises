@@ -1,0 +1,52 @@
+﻿@page "/databases"
+@page "/databases/{DatabaseName}/tables"
+
+@inherits BasePageComponent
+@inject IConfiguration configuration
+@inject SqlQueryService SqlQueryService
+@using System.Data.SqlClient;
+@using Microsoft.Extensions.Configuration;
+
+
+@if (PageState.CanGoBack())
+{
+    <MudIconButton Icon="@Icons.Material.Filled.ArrowBack" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo(PageState.PreviousPage(), true))"></MudIconButton>
+}
+
+<MudTable Items="@Data" Dense="true" Hover="true" Breakpoint="Breakpoint.Sm" Class="mt-1">
+    <HeaderContent>
+        <MudTh>Name</MudTh>
+        <MudTh></MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Name">@context</MudTd>
+        <MudTd>
+            @if (string.IsNullOrEmpty(DatabaseName))
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo($"/databases/{context}/tables", true))"></MudIconButton>
+            }
+            else
+            {
+                <MudIconButton Icon="@Icons.Material.Filled.Link" Color="Color.Primary" OnClick="@(() => NavManager.NavigateTo($"/databases/{DatabaseName}/tables/{context}", true))"></MudIconButton>
+            }
+        </MudTd>
+    </RowTemplate>
+</MudTable>
+
+
+@code {
+    [Parameter]
+    public string DatabaseName { get; set; }
+
+    public ICollection<string> Data { get; set; } = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        if (string.IsNullOrEmpty(DatabaseName))
+            Data = SqlQueryService.ExecuteQuery<string>("SELECT name FROM master.dbo.sysdatabases");
+        else
+            Data = SqlQueryService.ExecuteQuery<string>($"USE {DatabaseName}; SELECT name FROM sys.tables");
+
+        base.OnInitialized();
+    }
+}
