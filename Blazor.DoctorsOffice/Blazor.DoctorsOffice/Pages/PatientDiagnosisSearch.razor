@@ -1,0 +1,74 @@
+﻿@page "/patient/diagnosis/search"
+@using Blazor.DoctorsOffice.Database;
+@using Blazor.DoctorsOffice.Database.Models;
+@using Microsoft.EntityFrameworkCore;
+
+@inject DatabaseContext database
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <h1>Patient-Diagnosis search</h1>
+
+    <div class="row">
+        <MudGrid>
+            <MudItem xs="4">
+                <MudTextField @bind-Value="PatientId" Label="Patient-Id" Variant="Variant.Filled" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.PermIdentity" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudRadioGroup @bind-SelectedOption="@Month">
+                    <MudRadio T="int?" Color="Color.Primary" Option="0">current month</MudRadio>
+                    <MudRadio T="int?" Color="Color.Primary" Option="-1">last month</MudRadio>
+                    <MudRadio T="int?" Color="Color.Primary" Option="null">entire period</MudRadio>
+                </MudRadioGroup>
+            </MudItem>
+            <MudItem xs="1">
+                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Search" Color="Color.Primary" OnClick="@(() => Search())">Search</MudButton>
+            </MudItem>
+        </MudGrid>
+    </div>
+    <div class="row mt-5">
+        @if (Data != null)
+        {
+            if (Data.Any())
+            {
+                <MudTable Items="@Data" Hover="true" Breakpoint="Breakpoint.Sm">
+                    <HeaderContent>
+                        <MudTh>Patient</MudTh>
+                        <MudTh>Disease</MudTh>
+                        <MudTh>Diagnosis</MudTh>
+                        <MudTh>Date</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Patient"> @context.Patient.FirstName @context.Patient.LastName </MudTd>
+                        <MudTd DataLabel="Disease"> @context.Diagnosis.Disease.Name </MudTd>
+                        <MudTd DataLabel="Diagnosis"> @context.Diagnosis.Title </MudTd>
+                        <MudTd DataLabel="Date"> @context.Visit </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else
+            {
+                <h3>The patient with the id '@PatientId' has no data for the given period.</h3>
+            }
+        }
+    </div>
+</MudContainer>
+
+@code {
+    public int? Month { get; set; }
+
+    public int PatientId { get; set; }
+
+    public ICollection<PatientDiagnosis> Data { get; set; }
+
+    public void Search()
+    {
+        Data = database.PatientDiagnoses
+            .Include(c => c.Patient)
+            .Include(c => c.Diagnosis)
+                .ThenInclude(c => c.Disease)
+            .Where(c => (Month != null ? c.Visit.Month == DateTime.Now.AddMonths(Month.Value).Month : true) && c.PatientId == PatientId)
+            .ToList();
+
+        StateHasChanged();
+    }
+}

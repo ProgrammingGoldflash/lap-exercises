@@ -8,7 +8,7 @@ namespace Blazor.DoctorsOffice.Database.Models
         #region Public Properties
 
         [Column(TypeName = "Date")]
-        public DateTime DateTime { get; set; }
+        public DateTime Birth { get; set; }
 
         public string FirstName { get; set; }
 
