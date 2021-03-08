@@ -1,6 +1,6 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider />
+<MudThemeProvider Theme="CustomTheme" />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
@@ -13,7 +13,7 @@
     </MudAppBar>
     <MudDrawer @bind-Open="_drawerOpen" Elevation="1">
         <MudDrawerHeader>
-            <MudText Typo="Typo.h5">Blazor Template</MudText>
+            <MudText Typo="Typo.h5">Movie Management</MudText>
         </MudDrawerHeader>
         <NavMenu />
     </MudDrawer>
@@ -24,6 +24,16 @@
 
 @code {
     bool _drawerOpen = true;
+
+    MudTheme CustomTheme = new MudTheme()
+    {
+        Palette = new Palette()
+        {
+            Primary = "#339900",
+            Secondary = Colors.Green.Accent4,
+            AppbarBackground = "#339900",
+        }
+    };
 
     void DrawerToggle()
     {

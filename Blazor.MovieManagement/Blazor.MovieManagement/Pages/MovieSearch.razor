@@ -1,0 +1,77 @@
+﻿@page "/movies/search"
+@page "/movies/search/{ProductionCompany}"
+
+@inject AutoMapper.IMapper mapper
+@inject Blazor.MovieManagement.Database.DatabaseContext database
+@inject ISnackbar Snackbar
+@using Blazor.MovieManagement.ViewModel
+@using Blazor.MovieManagement.Components
+@using Microsoft.EntityFrameworkCore
+
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-8">
+    <h1>MovieSearch</h1>
+
+    <div class="row">
+        <MudGrid>
+            <MudItem xs="4">
+                <MudTextField @bind-Value="ProductionCompany" Label="Production-Company" Variant="Variant.Filled" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business" />
+            </MudItem>
+            <MudItem xs="12">
+                <MudButton Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Search" Color="Color.Primary" OnClick="@(() => Search())">Search</MudButton>
+            </MudItem>
+        </MudGrid>
+    </div>
+    <div class="row mt-3">
+        @if (Data != null)
+        {
+            if (Data.Any())
+            {
+                <div class="row mb-5">
+                    <span><b>Found production company:</b> @FoundCompany</span>
+                </div>
+                <DynamicTable T="MovieViewModel" Data="Data"></DynamicTable>
+            }
+            else
+            {
+                <h3>There are no produced movies yet!</h3>
+            }
+        }
+    </div>
+</MudContainer>
+
+@code {
+    [Parameter]
+    public string ProductionCompany { get; set; }
+
+    public ICollection<MovieViewModel> Data { get; set; }
+
+    public string FoundCompany { get; set; }
+
+    public void Search()
+    {
+        var company = database.ProductionCompanies
+            .Include(c => c.Movies)
+            .FirstOrDefault(c => c.Name.Contains(ProductionCompany));
+
+        if (company != null)
+        {
+            FoundCompany = company.Name;
+            Data = mapper.Map<ICollection<MovieViewModel>>(company.Movies);
+        }
+        else
+        {
+            FoundCompany = default;
+            Data = null;
+
+            Snackbar.Add($"No production company found for '{ProductionCompany}'", Severity.Error);
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        Snackbar.Configuration.SnackbarVariant = Variant.Filled;
+        Snackbar.Configuration.MaxDisplayedSnackbars = 10;
+        base.OnInitialized();
+    }
+}
