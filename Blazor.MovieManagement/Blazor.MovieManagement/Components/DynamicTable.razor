@@ -1,6 +1,6 @@
 ﻿@typeparam T
 
-<MudTable Items="@Data" Hover="true" Dense="true" Breakpoint="Breakpoint.Sm">
+<MudTable Items="@Data" Hover="true" Breakpoint="Breakpoint.Sm">
     <HeaderContent>
         @foreach (var prop in _properties)
         {
@@ -18,7 +18,6 @@
             {
                 <MudTd DataLabel="@prop.Name">@prop.GetValue(context)</MudTd>
             }
-
         }
     </RowTemplate>
 </MudTable>
